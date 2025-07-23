@@ -1,4 +1,4 @@
-# 导入 Streamlit 库，用于构建Web 应用
+# 导入 Streamlit 库，用于构建Web应用
 import streamlit as st
 
 # 导入joblib库，用于加载和保存机器学习模型
@@ -14,38 +14,38 @@ import pandas as pd
 import shap
 
 # 导入Matplotlib库，用于数据可视化
-import matplotlib. pyplot as plt
+import matplotlib.pyplot as plt  # 修正了这里的空格问题
 
-#从LIME 库中导入LimeTabuLarExpLainer,用于解释表格数据的机器学习模型
+# 从LIME库中导入LimeTabularExplainer，用于解释表格数据的机器学习模型
 from lime.lime_tabular import LimeTabularExplainer
 
-#加载训练好的模型（LRR.pkL）
+# 加载训练好的模型（LRR.pkl）
 model = joblib.load('LRR.pkl')
 
-#从X_test.csv文件加载测试数据，以便用于LIME解释器
+# 从X_test.csv文件加载测试数据，以便用于LIME解释器
 X_test = pd.read_csv('X_test.csv')
 
-#定义特征名称，对应数据集中的列名
+# 定义特征名称，对应数据集中的列名
 feature_names = [
-    "Sodium_max", # Sodium_max
-    "Vasopressor", # Vasopressor
-    "APSIII", # APSIII
-    "Age", # Age
-    "Calcium_max", # Calcium_max
-    "Respiratory_rate_min", # Respiratory_rate_min
-    "Ventilation", # Ventilation
-    "Dementia", # Dementia
-    "Metastatic_solid_tumor", # Metastatic_solid_tumor
+    "Sodium_max",  # Sodium_max
+    "Vasopressor",  # Vasopressor
+    "APSIII",  # APSIII
+    "Age",  # Age
+    "Calcium_max",  # Calcium_max
+    "Respiratory_rate_min",  # Respiratory_rate_min
+    "Ventilation",  # Ventilation
+    "Dementia",  # Dementia
+    "Metastatic_solid_tumor",  # Metastatic_solid_tumor
 ]
 
-# Streamlit用面
-st.title("In-hospital mortality risk of TBI patients") # 设置网页标题
-         
+# Streamlit页面
+st.title("In-hospital mortality risk of TBI patients")  # 设置网页标题
+
 # Sodium_max：数值输入框
 Sodium_max = st.number_input("Sodium_max:", min_value=0, max_value=500, value=12)
 
-# Vasopressor：数值输入框
-Vasopressor = st.selectbox("Vasopressor:", options=[0, 1], format_func=lambda x:"0"if x==1 else"1")
+# Vasopressor：选择框（修正了显示标签）
+Vasopressor = st.selectbox("Vasopressor:", options=[0, 1], format_func=lambda x: "Yes" if x == 1 else "No")
 
 # APSIII：数值输入框
 APSIII = st.number_input("APSIII:", min_value=0, max_value=100, value=10)
@@ -59,90 +59,91 @@ Calcium_max = st.number_input("Calcium_max:", min_value=0, max_value=20, value=2
 # Respiratory_rate_min：数值输入框
 Respiratory_rate_min = st.number_input("Respiratory_rate_min:", min_value=0, max_value=30, value=20)
 
-# Ventilation：数值输入框
-Ventilation = st.selectbox("Ventilation:", options=[0, 1], format_func=lambda x:"0"if x==1 else"1")
+# Ventilation：选择框（修正了显示标签）
+Ventilation = st.selectbox("Ventilation:", options=[0, 1], format_func=lambda x: "Yes" if x == 1 else "No")
 
-# Dementia：数值输入框
-Dementia = st.selectbox("Dementia:", options=[0, 1], format_func=lambda x:"0"if x==1 else"1")
+# Dementia：选择框（修正了显示标签）
+Dementia = st.selectbox("Dementia:", options=[0, 1], format_func=lambda x: "Yes" if x == 1 else "No")
 
-# Metastatic_solid_tumor：数值输入框
-Metastatic_solid_tumor = st.selectbox("Metastatic_solid_tumor:", options=[0, 1], format_func=lambda x:"0"if x==1 else"1")
+# Metastatic_solid_tumor：选择框（修正了显示标签）
+Metastatic_solid_tumor = st.selectbox("Metastatic_solid_tumor:", options=[0, 1], format_func=lambda x: "Yes" if x == 1 else "No")
 
 # 处理输入数据并进行预测
-feature_values = [Sodium_max, Vasopressor, APSIII, Age, Calcium_max, Respiratory_rate_min, Ventilation, Dementia, Metastatic_solid_tumor]# 将用户输入的特征值存入列表
+feature_values = [Sodium_max, Vasopressor, APSIII, Age, Calcium_max, Respiratory_rate_min, Ventilation, Dementia, Metastatic_solid_tumor]  # 将用户输入的特征值存入列表
+features = np.array([feature_values])  # 将特征转换为NumPy数组，适用于模型输入
 
-features=np.array([feature_values])# 将特征转换为NumPy 数组，适用于模型输入
-
-# 当用户点击“ Predict”按钮时执行以下代码
+# 当用户点击"Predict"按钮时执行以下代码
 if st.button("Predict"):
-    # 预测类别（0：无XX病，1：有XX病）
+    # 预测类别（0：低风险，1：高风险）
     predicted_class = model.predict(features)[0]
     # 预测类别的概率
-    predicted_proba = model.predict_proba(features)[0] 
-
-
-    # 显示预测结果
-    st.write(f"**Predicted Class: * {predicted_class} (1: high risk of in-hospital mortality, 0: low risk of in-hospital mortality)")
-    st.write(f"**Prediction Probabilities: ** {predicted_proba}")
+    predicted_proba = model.predict_proba(features)[0]
+    
+    # 显示预测结果（修正了显示格式）
+    risk_status = "high risk" if predicted_class == 1 else "low risk"
+    st.write(f"**Predicted Risk Status:** {risk_status} of in-hospital mortality")
+    st.write(f"**Probability of Low Risk:** {predicted_proba[0]:.4f}")
+    st.write(f"**Probability of High Risk:** {predicted_proba[1]:.4f}")
 
     # 根据预测结果生成建议
     probability = predicted_proba[predicted_class] * 100
-    # 如果预测类别为1（高风险）
     if predicted_class == 1:
         advice = (
-            f"According to our model, you have a high risk of in-hospital mortality. "
-            f"The model predicts that your probability of having risk of in-hospital mortality is {probability:.1f}%. "
-            "It's advised to consult with your healthcare provider for further evaluation and possible intervention."
+            f"According to our model, this patient has a high risk of in-hospital mortality. "
+            f"The model predicts a {probability:.1f}% probability of high risk. "
+            "Immediate clinical attention and intervention are recommended."
         )
-    # 如果预测类别为0（低风险）
     else:
         advice = (
-            f"According to our model, you have a low risk of in-hospital mortality."
-            f"The model predicts that your probability of not risk of in-hospital mortality is {probability:.1f}%."
-            "However, maintaining a healthy lifestyle is important. Please continue regular check-ups with your healthcare provider."
+            f"According to our model, this patient has a low risk of in-hospital mortality. "
+            f"The model predicts a {probability:.1f}% probability of low risk. "
+            "Standard monitoring and care are advised."
         )
-    # 显示建议
     st.write(advice)
 
-    # SHAP解释
-    st.subheader("SHAP Force Plot Explanation") 
-    #创建SHAP解释器，基于树模型（如随机森林）
-    explainer_shap = shap.KernelExplainerr(model) 
-    #计算SHAP值，用于解释模型的预测
-    shap_values = explainer_shap. shap_values(pd.DataFrame([feature_values], columns=feature_names)) 
+    # SHAP解释部分（完全重写）
+    st.subheader("SHAP Explanation")
     
-    # 根据预测类别显示SHAP强制图
-    # 期望值（基线值）
-    # 解释类别1（患病）的SHAP值
-    # 特征值数据
-    # 使用Matplotlib 绘图
-    if predicted_class == 1:
-        shap.force_plot(explainer_shap.expected_value[1], shap_values[:,:,1], pd.DataFrame([feature_values], columns=feature_names), matplotlib=True) 
-    # 期望值（基线值）
-    # 解释类别0（未患病）的SHAP值
-    # 特征值数据
-    # 使用Matplotlib绘图
-    else:
-        shap.force_plot(explainer_shap.expected_value[0], shap_values[:,:,0], pd.DataFrame([feature_values], columns=feature_names), matplotlib=True) 
+    # 创建SHAP解释器 - 使用KernelExplainer
+    explainer = shap.KernelExplainer(model.predict_proba, X_test.sample(50, random_state=42))
     
-    plt.savefig("shap_force_plot.png",bbox_inches='tight',dpi=1200)
-    st.image("shap_force_plot.png", caption='SHAP Force Plot Explanation')
+    # 计算SHAP值
+    shap_values = explainer.shap_values(features)
     
-    # LIME Explanation
+    # 创建图表
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # 根据预测类别选择显示哪个类别的解释
+    class_idx = 1 if predicted_class == 1 else 0
+    
+    # 生成瀑布图
+    shap.waterfall_plot(explainer.expected_value[class_idx], 
+                       shap_values[class_idx][0], 
+                       feature_names=feature_names,
+                       show=False)
+    
+    plt.title(f"SHAP Values for {'High Risk' if predicted_class == 1 else 'Low Risk'} Prediction")
+    plt.tight_layout()
+    
+    # 在Streamlit中显示图表
+    st.pyplot(fig)
+    plt.clf()  # 清除图形避免后续绘图重叠
+
+    # LIME解释部分
     st.subheader("LIME Explanation")
     lime_explainer = LimeTabularExplainer(
         training_data=X_test.values,
         feature_names=X_test.columns.tolist(),
-        class_names=['Low risk', 'High risk'], # Adjust class names to match your classification task mode='classification
+        class_names=['Low risk', 'High risk'],
         mode='classification'
-)
+    )
 
-    # Explain the instance
+    # 解释当前实例
     lime_exp = lime_explainer.explain_instance(
-        data_row=features. flatten(),
+        data_row=features.flatten(),
         predict_fn=model.predict_proba
     )
 
-    # Display the LIME explanation without the feature value table
-    lime_html = lime_exp.as_html(show_table=False) # Disable feature value table
-    st.components.v1.html(lime_html, height=800, scrolling=True)  
+    # 显示LIME解释（不显示特征值表格）
+    lime_html = lime_exp.as_html(show_table=False)  # 禁用特征值表格
+    st.components.v1.html(lime_html, height=800, scrolling=True)
